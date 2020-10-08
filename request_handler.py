@@ -1,9 +1,32 @@
-import json
-from employees.request import get_all_employees, get_single_employee
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import json
+
+from employees import get_all_employees, get_single_employee, create_employee
 from locations import get_all_locations, get_single_location, create_location
 from animals import get_all_animals, get_single_animal, create_animal
 from customers import get_all_customers, get_single_customer
+
+HANDLERS = {
+    "animals": {
+        "get_all": get_all_animals,
+        "get_single": get_single_animal,
+        "create": create_animal
+    },
+    "locations": {
+        "get_all": get_all_locations,
+        "get_single": get_single_location,
+        "create": create_location
+    },
+    "employees": {
+        "get_all": get_all_employees,
+        "get_single": get_single_employee,
+        "create": create_employee
+    },
+    "customers": {
+        "get_all": get_all_customers,
+        "get_single": get_single_customer
+    }
+}
 
 
 # Here's a class. It inherits from another class.
@@ -44,33 +67,13 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Parse the URL and capture the tuple that is returned
         (resource, id) = self.parse_url(self.path)
 
-        if resource == "animals":
-            if id is not None:
-                response = f"{get_single_animal(id)}"
+        resource_handlers = HANDLERS[resource]
 
-            else:
-                response = f"{get_all_animals()}"
-
-        if resource == "locations":
-            if id is not None:
-                response = f"{get_single_location(id)}"
-
-            else:
-                response = f"{get_all_locations()}"
-
-        if resource == "employees":
-            if id is not None:
-                response = f"{get_single_employee(id)}"
-
-            else:
-                response = f"{get_all_employees()}"
-
-        if resource == "customers":
-            if id is not None:
-                response = f"{get_single_customer(id)}"
-
-            else:
-                response = f"{get_all_customers()}"
+        if(id is not None):
+            response = f"{resource_handlers['get_single'](id)}"
+        
+        else:
+            response = f"{resource_handlers['get_all']()}"
 
         self.wfile.write(response.encode())
 
@@ -88,25 +91,11 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Parse the URL
         (resource, id) = self.parse_url(self.path)
 
-        # Initialize new animal
-        new_animal = None
-        new_location = None
+        # Initialize new resource
+        resource_creation_handler = HANDLERS[resource]['create']
+        new_resource = resource_creation_handler(post_body)
 
-        # Add a new animal to the list. Don't worry about
-        # the orange squiggle, you'll define the create_animal
-        # function next.
-        if resource == "animals":
-            new_animal = create_animal(post_body)
-
-            # Encode the new animal and send in response
-            self.wfile.write(f"{new_animal}".encode())
-
-        if resource == "locations":
-            new_location = create_location(post_body)
-
-            self.wfile.write(f"{new_location}".encode())
-
-
+        self.wfile.write(f"{new_resource}".encode())
 
     # Here's a method on the class that overrides the parent's method.
     # It handles any PUT request.
