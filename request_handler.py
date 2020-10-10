@@ -4,7 +4,7 @@ import json
 
 from employees import get_all_employees, get_single_employee, create_employee, delete_employee
 from locations import get_all_locations, get_single_location, create_location, delete_location
-from animals import get_all_animals, get_single_animal, delete_animal, create_animal
+from animals import get_all_animals, get_single_animal, delete_animal, create_animal, update_animal
 from customers import get_all_customers, get_single_customer
 
 HANDLERS = {
@@ -12,7 +12,8 @@ HANDLERS = {
         "get_all": get_all_animals,
         "get_single": get_single_animal,
         "create": create_animal,
-        "delete": delete_animal
+        "delete": delete_animal,
+        "update": update_animal
     },
     "locations": {
         "get_all": get_all_locations,
@@ -32,6 +33,11 @@ HANDLERS = {
     }
 }
 
+class Foo:
+    def __init__(self, prop1, prop2, prop3):
+        self.firstProp = prop1
+        self.secondProp = prop2
+        self.thirdProp = prop3
 
 # Here's a class. It inherits from another class.
 class HandleRequests(BaseHTTPRequestHandler):
@@ -104,7 +110,14 @@ class HandleRequests(BaseHTTPRequestHandler):
     # Here's a method on the class that overrides the parent's method.
     # It handles any PUT request.
     def do_PUT(self):
-        self.do_POST()
+        self._set_headers(204)
+        content_len = int(self.headers.get('content-length', 0))
+        post_body = self.rfile.read(content_len)
+        post_body = json.loads(post_body)
+        (resource, id) = self.parse_url(self.path)
+        resource_update_handler = HANDLERS[resource]["update"]
+        resource_update_handler(id, post_body)
+        self.wfile.write("".encode())
 
     def do_DELETE(self):
         self._set_headers(204)
