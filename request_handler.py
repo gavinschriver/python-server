@@ -1,11 +1,12 @@
 from employees.request import delete_employee
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
+import urllib
 
 from employees import get_all_employees, get_single_employee, create_employee, delete_employee
 from locations import get_all_locations, get_single_location, create_location, delete_location
 from animals import get_all_animals, get_single_animal, delete_animal, create_animal, update_animal
-from customers import get_all_customers, get_single_customer
+from customers import get_all_customers, get_customers_by_email, get_single_customer
 
 HANDLERS = {
     "animals": {
@@ -33,32 +34,25 @@ HANDLERS = {
     }
 }
 
-class Foo:
-    def __init__(self, prop1, prop2, prop3):
-        self.firstProp = prop1
-        self.secondProp = prop2
-        self.thirdProp = prop3
-
-# Here's a class. It inherits from another class.
 class HandleRequests(BaseHTTPRequestHandler):
     def parse_url(self, path):
-        # Just like splitting a string in JavaScript. If the
-        # path is "/animals/1", the resulting list will
-        # have "" at index 0, "animals" at index 1, and "1"
-        # at index 2.
         path_params = path.split("/")
         resource = path_params[1]
-        id = None
+        if "?" in resource:
+            resource, param = resource.split("?")
+            key, value = param.split("=")
+            value = urllib.parse.unquote(value)
+            return (resource, key, value)
 
-        # Try to get the item at index 2
-        try:
-            id = int(path_params[2])
-        except IndexError:
-            pass  # No route parameter exists: /animals
-        except ValueError:
-            pass  # Request had trailing slash: /animals/
-
-        return (resource, id)  # This is a tuple
+        else:   
+            id = None
+            try:
+                id = int(path_params[2])
+            except IndexError:
+                pass  
+            except ValueError:
+                pass  
+            return (resource, id) 
 
 
     # Here's a class function
@@ -69,23 +63,38 @@ class HandleRequests(BaseHTTPRequestHandler):
         self.end_headers()
 
     # Here's a method on the class that overrides the parent's method.
-    # It handles any GET request.
     def do_GET(self):
         self._set_headers(200)
-        response = {}  # Default response
+        response = {} 
 
-        # Parse the URL and capture the tuple that is returned
-        (resource, id) = self.parse_url(self.path)
+        parsed = self.parse_url(self.path)
+        # if `parsed` tuple is 2 entries long, it's either a request for whole collection or 1 thing by id
+        if len(parsed) == 2:
+            (resourceName, id) = parsed
+            handlerDict = HANDLERS[resourceName]
+            if id is not None:
+                response = f"{handlerDict['get_single'](id)}"
+            else: 
+                response = f"{handlerDict['get_all']()}" 
 
-        resource_handlers = HANDLERS[resource]
+        elif len(parsed) == 3:
+            (resourceName, key, value) = parsed
+            if key == "email" and resourceName == "customers":
+                response = get_customers_by_email(value)
 
-        if(id is not None):
-            response = f"{resource_handlers['get_single'](id)}"
-        
-        else:
-            response = f"{resource_handlers['get_all']()}"
+        self.wfile.write(response.encode())        
 
-        self.wfile.write(response.encode())
+            # if resourceName == "animals":
+            #     if id is not None:
+            #         response = f"{get_single_animal(id)}"
+            #     else:
+            #         response = f"{get_all_animals()}"
+            # elif resourceName == "customers":
+            #     if id is not None:
+            #         response = f"{get_single_customer(id)}"
+            #     else:
+            #         response =  f"{get_all_customers()}"
+
 
 
     # Here's a method on the class that overrides the parent's method.

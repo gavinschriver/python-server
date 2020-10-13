@@ -37,3 +37,24 @@ def get_single_customer(id):
       """, (id, ))
       foundCust = db_cursor.fetchone()
       return json.dumps(Customer(foundCust['id'], foundCust['name'], foundCust['address'], foundCust['email'], foundCust['password']).__dict__)
+
+def get_customers_by_email(emailValue):
+    with sqlite3.connect("./kennel.db") as connection:
+      connection.row_factory = sqlite3.Row
+      db_cursor = connection.cursor()
+      db_cursor.execute("""
+        SELECT
+          c.id,
+          c.name,
+          c.address,
+          c.email,
+          c.password
+        FROM Customer as C
+        WHERE c.email = ?    
+      """, ( emailValue, ))
+      customerList = []
+      data = db_cursor.fetchall()
+      for row in data:
+        customer = Customer(row['id'], row['name'], row['address'], row['email'], row['password'])
+        customerList.append(customer.__dict__)
+    return json.dumps(customerList)
