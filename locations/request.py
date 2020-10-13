@@ -1,28 +1,49 @@
-LOCATIONS = [
-    {
-        "id": 1,
-        "name": "Nashville North",
-        "address": "8422 Johnson Pike"
-    },
-    {
-        "id": 2,
-        "name": "Nashville South",
-        "address": "209 Emory Drive"
-    }
-]
+import sqlite3
+import json
+from models import Location
 
 def get_all_locations():
-    return LOCATIONS
+    with sqlite3.connect("./kennel.db") as con:
+        con.row_factory = sqlite3.Row
+        cursor = con.cursor()
+
+        cursor.execute("""
+        SELECT 
+            l.id,
+            l.name,
+            l.address
+        FROM Location l
+        """)
+
+        locations = []
+
+        datacollection = cursor.fetchall()
+
+        for tuple in datacollection:
+            location = Location(tuple['id'], tuple['name'], tuple['address'])
+        
+            locations.append(location.__dict__)
+    return json.dumps(locations)
 
 def get_single_location(id):
-    requested_location = None
+    with sqlite3.connect("./kennel.db") as con:
+        con.row_factory = sqlite3.Row
+        cursor = con.cursor()
+        cursor.execute("""
+        SELECT
+            l.id,
+            l.name,
+            l.address
+        FROM Location l
+        WHERE l.id = ?   
+        """, (id, ))
 
-    for location in LOCATIONS:
+        sqlResultAsPythonObject = cursor.fetchone()
 
-        if location["id"] == id:
-            requested_location = location
+        location = Location(sqlResultAsPythonObject['id'], sqlResultAsPythonObject['name'], sqlResultAsPythonObject['address'])
 
-    return requested_location
+        return json.dumps(location.__dict__)
+
 
 def create_location(location):
     max_id = LOCATIONS[-1]["id"]
