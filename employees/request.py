@@ -1,58 +1,44 @@
-EMPLOYEES = [
-    {
-      "id": 1,
-      "name": "Jerry",
-      "locationId": 2
-    },
-    {
-      "id": 2,
-      "name": "Jeremi",
-      "locationId": 1
-    },
-    {
-      "id": 3,
-      "name": "Jeremiah",
-      "locationId": 1
-    },
-    {
-      "name": "yikee",
-      "locationId": 1,
-      "id": 6
-    },
-    {
-      "name": "Big oll shitpants",
-      "locationId": 2,
-      "id": 7
-    },
-    {
-      "name": "trying",
-      "locationId": 1,
-      "id": 8
-    },
-    {
-      "name": "dontmatta",
-      "locationId": 1,
-      "id": 9
-    },
-    {
-      "name": "YA DADDYEE",
-      "locationId": 2,
-      "id": 11
-    }
-]
+from models.employee import Employee
+import sqlite3
+import json
+from models import Location
 
 def get_all_employees():
-    return EMPLOYEES
+    with sqlite3.connect("./kennel.db") as con:
+      con.row_factory = sqlite3.Row
+      db_cursor = con.cursor()
+      db_cursor.execute("""
+      SELECT 
+        e.id,
+        e.name,
+        e.address,
+        e.location_id
+      FROM Employee e  
+      """)
+      employeeList = []
+      dataset = db_cursor.fetchall()
+      for row in dataset:
+        empObj = Employee(row['id'], row['name'], row['address'], row['location_id'], "")
+        employeeList.append(empObj.__dict__)
+      return json.dumps(employeeList)
 
 def get_single_employee(id):
-    requested_employee = None
+       with sqlite3.connect("./kennel.db") as con:
+        con.row_factory = sqlite3.Row
+        db_cursor = con.cursor()
+        db_cursor.execute("""
+        SELECT 
+          e.id,
+          e.name,
+          e.address,
+          e.location_id
+        FROM Employee e  
+        WHERE e.id = ?
+        """, (id, ))
 
-    for employee in EMPLOYEES:
-
-        if employee["id"] == id:
-            requested_employee = employee
-
-    return requested_employee
+        empTuple = db_cursor.fetchone()
+        empObj = Employee(empTuple['id'], empTuple['name'], empTuple['address'], empTuple['location_id'], "")
+        return json.dumps(empObj.__dict__)  
 
 def create_employee(employee):
     max_id = EMPLOYEES[-1]["id"]

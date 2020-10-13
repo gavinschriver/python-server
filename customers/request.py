@@ -1,77 +1,39 @@
-CUSTOMERS = [
-    {
-      "id": 1,
-      "name": "Hannah Hall",
-      "address": "7002 Chestnut Ct"
-    },
-    {
-      "id": 2,
-      "name": "James Schroeder",
-      "address": "14 Ellington Street"
-    },
-    {
-      "id": 3,
-      "name": "Jenny Penny",
-      "address": "1-2 Menny"
-    },
-    {
-      "email": "ITSYABOIITHO@YABOII.YA",
-      "password": "yaboy",
-      "name": "NOT YA MOM NOT YA DADDY",
-      "id": 4
-    },
-    {
-      "email": "fuckkkshit@gmail.fuck",
-      "password": "fuck",
-      "name": "Another person Goddamnit",
-      "id": 5
-    },
-    {
-      "email": "whydoyou@whydoyou.suck",
-      "password": "yousuck",
-      "name": "BLEH NAW",
-      "id": 6
-    },
-    {
-      "email": "myface@myface.myface",
-      "password": "myface",
-      "name": "myface myface",
-      "id": 7
-    },
-    {
-      "email": "nah@nah.nah",
-      "password": "nah",
-      "name": "nah nah",
-      "id": 8
-    },
-    {
-      "email": "nah@nah.nah",
-      "password": "nah",
-      "name": "nah nah",
-      "id": 9
-    },
-    {
-      "email": "gavy@gavy.gavy",
-      "password": "gavy",
-      "name": "gavy gavy",
-      "id": 10
-    },
-    {
-      "email": "fuck@fuck.fuck",
-      "password": "fuck",
-      "name": "fuck fuck",
-      "id": 11
-    }
-]
+import sqlite3
+import json
+from models import Customer
+
 
 def get_all_customers():
-    return CUSTOMERS
+    with sqlite3.connect("./kennel.db") as conn:
+      conn.row_factory = sqlite3.Row
+      dbcursor = conn.cursor()
+      dbcursor.execute("""
+        SELECT
+          c.id,
+          c.name,
+          c.address,
+          c.email,
+          c.password
+        FROM Customer AS c
+      """)
+      allCustomers = []
+      for pythonTuple in dbcursor.fetchall():
+        allCustomers.append(Customer(pythonTuple['id'], pythonTuple['name'], pythonTuple['address'], pythonTuple['email'], pythonTuple['password']).__dict__)
+      return json.dumps(allCustomers)
 
 def get_single_customer(id):
-    requested_customer = None
-
-    for customer in CUSTOMERS:
-        if customer["id"] == id:
-            requested_customer = customer
-    
-    return requested_customer
+    with sqlite3.connect("./kennel.db") as connection:
+      connection.row_factory = sqlite3.Row
+      db_cursor = connection.cursor()
+      db_cursor.execute("""
+      SELECT
+        c.id,
+        c.name,
+        c.address,
+        c.email,
+        c.password
+      FROM Customer c
+      WHERE c.id = ?
+      """, (id, ))
+      foundCust = db_cursor.fetchone()
+      return json.dumps(Customer(foundCust['id'], foundCust['name'], foundCust['address'], foundCust['email'], foundCust['password']).__dict__)
