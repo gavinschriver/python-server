@@ -30,7 +30,8 @@ HANDLERS = {
     },
     "customers": {
         "get_all": get_all_customers,
-        "get_single": get_single_customer
+        "get_single": get_single_customer,
+        "get_by_email": get_customers_by_email
     }
 }
 
@@ -79,24 +80,11 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         elif len(parsed) == 3:
             (resourceName, key, value) = parsed
-            if key == "email" and resourceName == "customers":
-                response = get_customers_by_email(value)
+            handlerDict = HANDLERS[resourceName]
+            if key == "email":
+                response = f"{handlerDict['get_by_email'](value)}"
 
         self.wfile.write(response.encode())        
-
-            # if resourceName == "animals":
-            #     if id is not None:
-            #         response = f"{get_single_animal(id)}"
-            #     else:
-            #         response = f"{get_all_animals()}"
-            # elif resourceName == "customers":
-            #     if id is not None:
-            #         response = f"{get_single_customer(id)}"
-            #     else:
-            #         response =  f"{get_all_customers()}"
-
-
-
     # Here's a method on the class that overrides the parent's method.
     # It handles any POST request.
     def do_POST(self):
