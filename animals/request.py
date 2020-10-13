@@ -3,34 +3,6 @@ import json
 from sqlite3.dbapi2 import connect
 from models import Animal
 
-ANIMALS = [
-    {
-        "id": 1,
-        "name": "Snickers",
-        "species": "Dog",
-        "locationId": 1,
-        "customerId": 4,
-        "status": "admitted"
-    },
-    {
-        "id": 2,
-        "name": "Gypsy",
-        "species": "Dog",
-        "locationId": 1,
-        "customerId": 2,
-        "status": "admitted"
-    },
-    {
-        "id": 3,
-        "name": "Blue",
-        "species": "Cat",
-        "locationId": 2,
-        "customerId": 1,
-        "status": "admitted"
-    }
-]
-
-
 def get_all_animals():
     # Open a connection to the database
     with sqlite3.connect("./kennel.db") as conn:
@@ -99,6 +71,50 @@ def get_single_animal(id):
         foundSQLObj['customer_id'])
 
         return json.dumps(animalPythonObj.__dict__)
+
+def get_animals_by_location(loc):
+    with sqlite3.connect("./kennel.db") as con:
+        con.row_factory = sqlite3.Row
+        cursor = con.cursor()
+        cursor.execute("""
+        SELECT
+            a.id,
+            a.name,
+            a.breed,
+            a.status,
+            a.customer_id,
+            a.location_id
+        FROM Animal AS a
+        WHERE a.location_id = ?    
+        """, (loc,))
+        list = []
+        data = cursor.fetchall()
+        print(data)
+        for row in data:
+            list.append(Animal(row['id'], row['name'], row['breed'], row['status'], row['location_id'], row['customer_id']).__dict__)
+        return json.dumps(list)
+
+def get_animals_by_status(status):
+    with sqlite3.connect("./kennel.db") as con:
+        con.row_factory = sqlite3.Row
+        cursor = con.cursor()
+        cursor.execute("""
+        SELECT
+            a.id,
+            a.name,
+            a.breed,
+            a.status,
+            a.customer_id,
+            a.location_id
+        FROM Animal AS a
+        WHERE a.status = ?    
+        """, (status,))
+        list = []
+        data = cursor.fetchall()
+        print(data)
+        for row in data:
+            list.append(Animal(row['id'], row['name'], row['breed'], row['status'], row['location_id'], row['customer_id']).__dict__)
+        return json.dumps(list)
 
 def create_animal(animal):
     # Get the id value of the last animal in the list

@@ -3,15 +3,17 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import urllib
 
-from employees import get_all_employees, get_single_employee, create_employee, delete_employee
+from employees import get_all_employees, get_single_employee, create_employee, delete_employee, get_employee_by_location
 from locations import get_all_locations, get_single_location, create_location, delete_location
-from animals import get_all_animals, get_single_animal, delete_animal, create_animal, update_animal
+from animals import get_all_animals, get_single_animal, delete_animal, create_animal, update_animal, get_animals_by_location, get_animals_by_status
 from customers import get_all_customers, get_customers_by_email, get_single_customer
 
 HANDLERS = {
     "animals": {
         "get_all": get_all_animals,
         "get_single": get_single_animal,
+        "get_by_location": get_animals_by_location,
+        "get_by_status": get_animals_by_status,
         "create": create_animal,
         "delete": delete_animal,
         "update": update_animal
@@ -25,6 +27,7 @@ HANDLERS = {
     "employees": {
         "get_all": get_all_employees,
         "get_single": get_single_employee,
+        "get_by_location": get_employee_by_location,
         "create": create_employee,
         "delete": delete_employee
     },
@@ -83,6 +86,10 @@ class HandleRequests(BaseHTTPRequestHandler):
             handlerDict = HANDLERS[resourceName]
             if key == "email":
                 response = f"{handlerDict['get_by_email'](value)}"
+            if key == "location_id":
+                response = f"{handlerDict['get_by_location'](value)}"
+            if key == "status":
+                response = f"{handlerDict['get_by_status'](value)}"
 
         self.wfile.write(response.encode())        
     # Here's a method on the class that overrides the parent's method.
@@ -92,7 +99,6 @@ class HandleRequests(BaseHTTPRequestHandler):
         content_len = int(self.headers.get('content-length', 0))
         post_body = self.rfile.read(content_len)
 
-        # Convert JSON string to a Python dictionary
         post_body = json.loads(post_body)
 
         # Parse the URL

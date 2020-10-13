@@ -1,5 +1,5 @@
 class Employee:
-    def __init__(self, id, name, address, location_id, animal_id):
+    def __init__(self, id, name, address, location_id, animal_id = ""):
         self.id = id
         self.name = name
         self.address = address
