@@ -125,7 +125,6 @@ class HandleRequests(BaseHTTPRequestHandler):
     def do_DELETE(self):
         (resource, id) = self.parse_url(self.path)
         delete_handler = HANDLERS[resource]["delete"]
-        delete_handler(id)
         success = delete_handler(id)
         if success:
             self._set_headers(204)

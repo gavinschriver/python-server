@@ -59,21 +59,25 @@ def get_employee_by_location(loc):
             list.append(Employee(row['id'], row['name'], row['address'], row['location_id']).__dict__)
           return json.dumps(list)
 
+def delete_employee(id):
+  with sqlite3.connect("./kennel.db") as conn:
+    cursor = conn.cursor()
+    cursor.execute("""
+    DELETE FROM Employee
+    WHERE id = ?
+    """, (id, )
+    )
+    if cursor.rowcount > 0:
+      return True
+    else:
+      return False
+
 def create_employee(employee):
     max_id = EMPLOYEES[-1]["id"]
     new_id = max_id + 1
     employee["id"] = new_id
     EMPLOYEES.append(employee)
     return employee
-
-def delete_employee(id):
-    employee_index = -1
-    for index, employee in enumerate(EMPLOYEES):
-      if employee["id"] == id:
-        employee_index = index
-    
-    if employee_index >= 0:
-      EMPLOYEES.pop(employee_index)
 
 
 
