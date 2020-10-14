@@ -123,11 +123,14 @@ class HandleRequests(BaseHTTPRequestHandler):
         self.wfile.write("".encode())
 
     def do_DELETE(self):
-        self._set_headers(204)
         (resource, id) = self.parse_url(self.path)
-
         delete_handler = HANDLERS[resource]["delete"]
         delete_handler(id)
+        success = delete_handler(id)
+        if success:
+            self._set_headers(204)
+        else:
+            self._set_headers(404)
         self.wfile.write("".encode())
 
 

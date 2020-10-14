@@ -116,6 +116,19 @@ def get_animals_by_status(status):
             list.append(Animal(row['id'], row['name'], row['breed'], row['status'], row['location_id'], row['customer_id']).__dict__)
         return json.dumps(list)
 
+def delete_animal(id):
+    with sqlite3.connect("./kennel.db") as conn:
+        db_cursor = conn.cursor()
+        db_cursor.execute("""
+        DELETE FROM Animal
+        WHERE id = ?    
+        """, (id, ))
+        rows_affected = db_cursor.rowcount
+        if rows_affected > 0:
+            return True
+        else:
+            return False
+            
 def create_animal(animal):
     # Get the id value of the last animal in the list
     max_id = ANIMALS[-1]["id"]
@@ -132,14 +145,6 @@ def create_animal(animal):
     # Return the dictionary with `id` property added
     return animal
 
-def delete_animal(id):
-    animal_index = -1
-    for index, animal in enumerate(ANIMALS):
-        if animal["id"] == id:
-            animal_index = index
-    
-    if animal_index >= 0:
-        ANIMALS.pop(animal_index)
 
 def update_animal(id, updated_animal):
     for index, animal in enumerate(ANIMALS):
