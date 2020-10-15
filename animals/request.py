@@ -59,16 +59,18 @@ def get_single_animal(id):
             a.name,
             a.breed,
             a.status,
-            a.customer_id,
-            a.location_id
+            l.name location_name,
+            c.name customer_name
         FROM Animal a
-        WHERE a.id = ?    
+        JOIN Location l ON l.id = a.location_id
+        JOIN Customer c ON c.id = a.customer_id 
+        WHERE a.id = ?
         """, ( id, ))
 
-        foundSQLObj = cursorObj.fetchone()
+        row = cursorObj.fetchone()
 
-        animalPythonObj = Animal(foundSQLObj['id'], foundSQLObj['name'], foundSQLObj['breed'], foundSQLObj['status'], foundSQLObj['location_id'],
-        foundSQLObj['customer_id'])
+        animalPythonObj = Animal(row['id'], row['name'], row['breed'], row['status'], row['location_name'],
+        row['customer_name'])
 
         return json.dumps(animalPythonObj.__dict__)
 
