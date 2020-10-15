@@ -62,3 +62,7 @@ SELECT breed FROM Animal WHERE customer_id <= 3;
 
 
 SELECT * FROM Animal
+
+SELECT * FROM Employee
+
+SELECT

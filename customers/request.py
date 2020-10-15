@@ -57,6 +57,6 @@ def get_customers_by_email(emailValue):
       customerList = []
       data = db_cursor.fetchall()
       for row in data:
-        customer = Customer(row['id'], row['name'], row['address'], row['email'], row['password'])
+        customer = Customer(row['id'], row['name'], row['address'], '', row['password'])
         customerList.append(customer.__dict__)
     return json.dumps(customerList)
