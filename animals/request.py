@@ -131,6 +131,27 @@ def delete_animal(id):
         else:
             return False
             
+
+
+def update_animal(id, updated_animal):
+    with sqlite3.connect("./kennel.db") as conn:
+        conn.row_factory= sqlite3.Row
+        c = conn.cursor()
+        c.execute("""
+        UPDATE Animal
+            SET 
+                name = ?,
+                breed = ?,
+                status = ?,
+                location_id = ?,
+                customer_id = ?
+        WHERE id = ?        
+        """, (updated_animal['name'], updated_animal['breed'], updated_animal['status'], updated_animal['location_id'], updated_animal['customer_id'], id, ))
+        if c.rowcount == 0:
+            return False
+        else:
+            return True
+
 def create_animal(animal):
     # Get the id value of the last animal in the list
     max_id = ANIMALS[-1]["id"]
@@ -146,10 +167,3 @@ def create_animal(animal):
 
     # Return the dictionary with `id` property added
     return animal
-
-
-def update_animal(id, updated_animal):
-    for index, animal in enumerate(ANIMALS):
-        if animal["id"] == id:
-            ANIMALS[index] = updated_animal
-            break
