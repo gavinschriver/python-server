@@ -15,5 +15,12 @@ SELECT
         FROM Animal a
         JOIN Location l ON l.id = a.location_id
         JOIN Customer c ON c.id = a.customer_id
-        WHERE a.id = 6
+        WHERE a.id = 6;
 
+
+
+
+UPDATE Animal SET Location_id = 1 WHERE id = 6;
+
+UPDATE Animal SET Location_id = 2 WHERE id = 7;
+UPDATE Animal SET Location_id = 1 WHERE id = 8;

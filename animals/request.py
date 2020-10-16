@@ -41,8 +41,8 @@ def get_all_animals():
             animal = Animal(row['id'], row['name'], row['breed'],
                             row['status'], row['location_id'],
                             row['customer_id'])
-            location = Location(row['location_id'], row['location_name'], row['location_address'])
-            customer = Customer(row['customer_id'], row['customer_name'], row['customer_address'])
+            location = Location("", row['location_name'], row['location_address'])
+            customer = Customer("", row['customer_name'], row['customer_address'])
             animal.location = location.__dict__
             animal.customer = customer.__dict__
             animals.append(animal.__dict__)
@@ -79,8 +79,8 @@ def get_single_animal(id):
         row = cursorObj.fetchone()
         animal = Animal(row['id'], row['name'], row['breed'], row['status'], row['location_id'],
         row['customer_id'])
-        location = Location(row['location_id'], row['location_name'], row['location_address'])
-        customer = Customer(row['customer_id'], row['customer_name'], row['customer_address'])
+        location = Location("", row['location_name'], row['location_address'])
+        customer = Customer("", row['customer_name'], row['customer_address'])
         animal.location = location.__dict__
         animal.customer = customer.__dict__
         return json.dumps(animal.__dict__)
@@ -164,17 +164,14 @@ def update_animal(id, updated_animal):
             return True
 
 def create_animal(animal):
-    # Get the id value of the last animal in the list
-    max_id = ANIMALS[-1]["id"]
-
-    # Add 1 to whatever that number is
-    new_id = max_id + 1
-
-    # Add an `id` property to the animal dictionary
-    animal["id"] = new_id
-
-    # Add the animal dictionary to the list
-    ANIMALS.append(animal)
-
-    # Return the dictionary with `id` property added
-    return animal
+    with sqlite3.connect("./kennel.db") as conn:
+        c = conn.cursor()
+        c.execute('''
+        INSERT INTO Animal
+            (name, breed, status, location_id, customer_id)
+        VALUES 
+            (?, ?, ?, ?, ?);
+        ''', (animal['name'], animal['breed'], animal['status'], animal['location_id'], animal['customer_id'],))
+        id = c.lastrowid
+        animal['id'] = id
+    return json.dumps(animal)

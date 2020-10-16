@@ -60,3 +60,16 @@ def get_customers_by_email(emailValue):
         customer = Customer(row['id'], row['name'], row['address'], '', row['password'])
         customerList.append(customer.__dict__)
     return json.dumps(customerList)
+
+def create_customer(customer):
+    with sqlite3.connect("./kennel.db") as conn:
+      c = conn.cursor()
+      c.execute('''
+      INSERT INTO Customer
+        (name, email, password, address)
+      VALUES 
+        (?, ?, ?, "");
+      ''', (customer['name'], customer['email'], customer['password'],)) 
+      id = c.lastrowid
+      customer['id'] = id
+    return json.dumps(customer)
