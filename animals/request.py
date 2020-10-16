@@ -1,7 +1,7 @@
 import sqlite3
 import json
 from sqlite3.dbapi2 import connect
-from models import Animal
+from models import Animal, Location, Customer
 
 def get_all_animals():
     # Open a connection to the database
@@ -19,8 +19,14 @@ def get_all_animals():
             a.breed,
             a.status,
             a.customer_id,
-            a.location_id
+            a.location_id,
+            l.name location_name,
+            l.address location_address,
+            c.name customer_name,
+            c.address as customer_address
         FROM Animal a
+        JOIN Location l ON l.id = a.location_id
+        JOIN Customer c ON c.id = a.customer_id
         """)
 
         # Initialize an empty list to hold all animal representations
@@ -32,14 +38,13 @@ def get_all_animals():
         # Iterate list of data returned from database
         for row in dataset:
 
-            # Create an animal instance from the current row.
-            # Note that the database fields are specified in
-            # exact order of the parameters defined in the
-            # Animal class above.
             animal = Animal(row['id'], row['name'], row['breed'],
                             row['status'], row['location_id'],
                             row['customer_id'])
-
+            location = Location(row['location_id'], row['location_name'], row['location_address'])
+            customer = Customer(row['customer_id'], row['customer_name'], row['customer_address'])
+            animal.location = location.__dict__
+            animal.customer = customer.__dict__
             animals.append(animal.__dict__)
 
     # Use `json` package to properly serialize list as JSON
@@ -59,8 +64,12 @@ def get_single_animal(id):
             a.name,
             a.breed,
             a.status,
+            a.location_id,
+            a.customer_id,
             l.name location_name,
-            c.name customer_name
+            l.address location_address,
+            c.name customer_name,
+            c.address customer_address
         FROM Animal a
         JOIN Location l ON l.id = a.location_id
         JOIN Customer c ON c.id = a.customer_id 
@@ -68,11 +77,13 @@ def get_single_animal(id):
         """, ( id, ))
 
         row = cursorObj.fetchone()
-
-        animalPythonObj = Animal(row['id'], row['name'], row['breed'], row['status'], row['location_name'],
-        row['customer_name'])
-
-        return json.dumps(animalPythonObj.__dict__)
+        animal = Animal(row['id'], row['name'], row['breed'], row['status'], row['location_id'],
+        row['customer_id'])
+        location = Location(row['location_id'], row['location_name'], row['location_address'])
+        customer = Customer(row['customer_id'], row['customer_name'], row['customer_address'])
+        animal.location = location.__dict__
+        animal.customer = customer.__dict__
+        return json.dumps(animal.__dict__)
 
 def get_animals_by_location(loc):
     with sqlite3.connect("./kennel.db") as con:
