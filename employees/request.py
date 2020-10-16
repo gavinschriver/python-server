@@ -73,12 +73,15 @@ def delete_employee(id):
       return False
 
 def create_employee(employee):
-    max_id = EMPLOYEES[-1]["id"]
-    new_id = max_id + 1
-    employee["id"] = new_id
-    EMPLOYEES.append(employee)
-    return employee
-
-
+  with sqlite3.connect("./kennel.db") as conn:
+    c = conn.cursor()
+    c.execute('''
+    INSERT INTO Employee
+      (name, location_id, animal_id, address)
+    VALUES
+      (?, ?, ?, ?)
+    ''', (employee['name'], employee['location_id'], employee['animal_id'], employee['address'],) )
+    employee['id'] = c.lastrowid
+  return json.dumps(employee)
 
 

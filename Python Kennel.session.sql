@@ -61,8 +61,31 @@ SELECT * FROM Location;
 SELECT breed FROM Animal WHERE customer_id <= 3;
 
 
-SELECT * FROM Animal
+CREATE TABLE `Animal` (
+	`id`  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	`name`  TEXT NOT NULL,
+	`status` TEXT NOT NULL,
+	`breed` TEXT NOT NULL,
+	`customer_id` INTEGER NOT NULL,
+	`location_id` INTEGER,
+	FOREIGN KEY(`customer_id`) REFERENCES `Customer`(`id`),
+	FOREIGN KEY(`location_id`) REFERENCES `Location`(`id`)
+);
 
-SELECT * FROM Employee
+INSERT INTO `Animal` VALUES (null, "Sophie", "Recreation", "Sweet keecat", 4, 1);
+INSERT INTO `Animal` VALUES (null, "kristy", "Spa day", "Tortoiseshell magiccat", 1, 1);
+INSERT INTO `Animal` VALUES (null, "zoe", "hugs and pets all day long", "some weird dalmation thing", 4, 2);
+INSERT INTO `Animal` VALUES (null, "molly", "Kennel", "best kind of mutt", 3, 1);
+INSERT INTO `Animal` VALUES (null, "abby", "digging", "another dang sweet mut", 2, 2);
 
-SELECT
+DROP TABLE Employee;
+
+CREATE TABLE `Employee` (
+	`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	`name`	TEXT NOT NULL,
+	`address`	TEXT NOT NULL,
+	`location_id` INTEGER NOT NULL,
+	`animal_id` INTEGER,
+	FOREIGN KEY(`location_id`) REFERENCES `Location`(`id`),
+	FOREIGN KEY (`animal_id`) REFERENCES `Animal`(`id`)
+);

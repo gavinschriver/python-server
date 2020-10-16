@@ -24,3 +24,4 @@ UPDATE Animal SET Location_id = 1 WHERE id = 6;
 
 UPDATE Animal SET Location_id = 2 WHERE id = 7;
 UPDATE Animal SET Location_id = 1 WHERE id = 8;
+

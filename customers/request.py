@@ -68,8 +68,8 @@ def create_customer(customer):
       INSERT INTO Customer
         (name, email, password, address)
       VALUES 
-        (?, ?, ?, "");
-      ''', (customer['name'], customer['email'], customer['password'],)) 
+        (?, ?, ?, ?);
+      ''', (customer['name'], customer['email'], customer['password'], customer['address'],)) 
       id = c.lastrowid
       customer['id'] = id
     return json.dumps(customer)
